@@ -61,7 +61,7 @@ module Msf
       include Msf::Ui::Console::CommandDispatcher
 
       def name
-        'DradisDispatcher'
+        'Dradis Logger'
       end
 
       # The list of commands we make available to the ./msfconsole
