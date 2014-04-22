@@ -8,6 +8,8 @@
 # Commands:
 #
 
+require 'dradis-client'
+
 module Msf
   class Plugin::Dradis < Msf::Plugin
     VERSION = '0.1.0'
@@ -67,9 +69,24 @@ module Msf
       # The list of commands we make available to the ./msfconsole
       def commands
         {
-          'dradis_help'	=> 'Displays help',
-          'dradis_version' => 'Displays version information'
+          # meta commands
+          'dradis_config'   => "Show Dradis API configuration (#{config_file})",
+          'dradis_help'	    => 'Displays help',
+          'dradis_version'  => 'Displays version information',
+
+          # API commands
+          'dradis_add_node' => 'Add a new Node to dradis',
+          'dradis_nodes'    => 'List all nodes'
         }
+      end
+
+      # --------------------------------------------------------- Meta commands
+      def cmd_dradis_config
+        return missing_config unless configured?
+
+        print_line "Dradis host: #{configuration[:host]}"
+        print_line "Dradis user: #{configuration[:user]}"
+        print_line "Dradis pass: #{configuration[:pass]}"
       end
 
       def cmd_dradis_help
@@ -78,6 +95,65 @@ module Msf
 
       def cmd_dradis_version
         print_line "#{Msf::Plugin::Dradis::name} v#{Msf::Plugin::Dradis::version}"
+      end
+
+
+
+      # ---------------------------------------------------------- API commands
+      def cmd_dradis_add_node(*args)
+        return missing_config unless configured?
+
+        if args.size == 1
+          dradis.add_node(args[0], parent_id: nil)
+        elsif args.size == 2
+          dradis.add_node(args[0], parent_id: args[1])
+        else
+          print_error "dradis_add_node node_label <parent_id>"
+        end
+      end
+
+      def cmd_dradis_nodes
+        return missing_config unless configured?
+
+        dradis.nodes.each do |node|
+          print_line "%02i: %-30s (pid: %02i)" % [node.id, node.label, node.parent_id || 0]
+        end
+      end
+
+      private
+
+      def dradis
+        @dradis ||= Dradis::Client::Endpoint.new do |config|
+                      config.host          = configuration[:host]
+                      config.user          = configuration[:user]
+                      config.shared_secret = configuration[:pass]
+                    end
+      end
+
+      def config_file
+        File.join(Msf::Config.get_config_root, 'dradis.yml')
+      end
+
+      def configuration
+        @config ||= if File.exists?(config_file)
+                      YAML.load_file(config_file).symbolize_keys
+                    else
+                      nil
+                    end
+      end
+
+      def configured?
+        !!configuration
+      end
+
+      def missing_config
+        print_error "No configuration found at: #{config_file}"
+        print_error "Use this as a template (without the =====):"
+        print_line "============================"
+        print_line "host: https://127.0.0.1:3004"
+        print_line "user: msf_api"
+        print_line "pass: shared_password"
+        print_line "============================"
       end
     end
   end
