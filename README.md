@@ -50,10 +50,10 @@ $ cd ~/metasploit-framework/
 $ ./msfconsole -L
 ```
 
-# Contrbuting
+# Contributing
 
-TBD
+See [CONTRIBUTING.md](https://github.com/dradis/metasploit-dradis/blob/master/CONTRIBUTING.md)
 
 # License
 
-TBD
+See [LICENSE](https://github.com/dradis/metasploit-dradis/blob/master/LICENSE)
