@@ -5,6 +5,34 @@ Send data to Dradis from the Metasploit console.
 
 # Install
 
+Installation is a 2-step process:
+
+* You have to require the Dradis client bindings in Metasploit's Gemfile
+* You have to load the Dradis plugin into the Framework
+
+## Adding the Dradis client library
+
+```
+$ cd ~/metasploit-framework/
+$ vi Gemfile
+```
+
+Add the [dradis-client](https://github.com/dradis/dradis-client) gem:
+
+```ruby
+gem 'dradis-client', github: 'dradis/dradis-client'
+```
+
+Save, close, and run Bundler to install:
+
+```
+$ bundle
+```
+
+
+
+## Loading the Dradis plugin
+
 ```
 $ cd ~/
 $ git clone https://github.com/dradis/metasploit-dradis.git
